@@ -15,7 +15,6 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-
         <div className="flex h-20 items-center justify-between">
 
           {/* Logo */}
@@ -38,7 +37,7 @@ export function Navbar() {
                 >
                   {item.label}
 
-                  {/* Active underline */}
+                  {/* Active navigation indicator */}
                   {isActive && (
                     <span className="absolute -bottom-2 left-0 h-0.5 w-full rounded-full bg-cyan-600" />
                   )}
@@ -47,7 +46,7 @@ export function Navbar() {
             })}
           </nav>
 
-          {/* Desktop CTA */}
+          {/* Contact CTA Button */}
           <Link
             href="/contact"
             className="hidden rounded-lg bg-cyan-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-cyan-700 lg:block"
@@ -55,12 +54,13 @@ export function Navbar() {
             Contact Us
           </Link>
 
-          {/* Mobile button */}
+          {/* Mobile Menu Button */}
           <button
             type="button"
             onClick={() => setOpen(!open)}
             className="rounded-md p-2 text-slate-700 lg:hidden"
-            aria-label="Toggle menu"
+            aria-label="Toggle navigation menu"
+            aria-expanded={open}
           >
             {open ? (
               <X className="h-6 w-6" />
@@ -68,7 +68,6 @@ export function Navbar() {
               <Menu className="h-6 w-6" />
             )}
           </button>
-
         </div>
 
         {/* Mobile Navigation */}
@@ -94,17 +93,17 @@ export function Navbar() {
                 );
               })}
 
+              {/* Mobile Contact CTA Button */}
               <Link
                 href="/contact"
                 onClick={() => setOpen(false)}
-                className="mt-2 rounded-lg bg-cyan-600 px-4 py-3 text-center text-sm font-semibold text-white"
+                className="mt-2 rounded-lg bg-cyan-600 px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-cyan-700"
               >
-                Speak with us
+                Contact Us
               </Link>
             </nav>
           </div>
         )}
-
       </div>
     </header>
   );

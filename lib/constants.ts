@@ -28,10 +28,6 @@ export const NAVIGATION: NavItem[] = [
     label: "Factory & Machinery",
     href: "/factory-machinery",
   },
-  {
-    label: "Contact Us",
-    href: "/contact",
-  },
 ];
 
 export const CONTACT_INFO = {
@@ -90,44 +86,52 @@ export const PROCESS_STEPS: ProcessStep[] = [
   {
     number: 1,
     title: "Requirement",
-    description: "We understand your product and sourcing requirements.",
+    description:
+      "We understand your product and sourcing requirements.",
   },
   {
     number: 2,
     title: "Factory Selection",
-    description: "We identify suitable manufacturing partners.",
+    description:
+      "We identify suitable manufacturing partners.",
   },
   {
     number: 3,
     title: "Production",
-    description: "Production is monitored according to the agreed specifications.",
+    description:
+      "Production is monitored according to the agreed specifications.",
   },
   {
     number: 4,
     title: "Quality Check",
-    description: "Products are inspected before shipment.",
+    description:
+      "Products are inspected before shipment.",
   },
   {
     number: 5,
     title: "Delivery",
-    description: "The completed order is prepared for shipment.",
+    description:
+      "The completed order is prepared for shipment.",
   },
 ];
 
 export const PRODUCTS: Product[] = [
   {
     title: "T-Shirts",
-    description: "Quality casual and basic T-shirt manufacturing.",
+    description:
+      "Quality casual and basic T-shirt manufacturing.",
     image: "/garment-rack.jpg",
   },
   {
     title: "Shirts",
-    description: "Formal and casual shirt sourcing solutions.",
+    description:
+      "Formal and casual shirt sourcing solutions.",
     image: "/garment-rack.jpg",
   },
   {
     title: "Jackets",
-    description: "Professional jacket and outerwear sourcing.",
+    description:
+      "Professional jacket and outerwear sourcing.",
     image: "/garment-rack.jpg",
   },
 ];
