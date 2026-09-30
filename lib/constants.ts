@@ -21,12 +21,16 @@ export const NAVIGATION: NavItem[] = [
     href: "/about",
   },
   {
+    label: "Factory & Machinery",
+    href: "/factory-machinery",
+  },
+  {
     label: "Buying House",
     href: "/buying-house",
   },
   {
-    label: "Factory & Machinery",
-    href: "/factory-machinery",
+    label: "Global Partners",
+    href: "/global-partners",
   },
 ];
 
