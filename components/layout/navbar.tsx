@@ -12,6 +12,8 @@ export function Navbar() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
+  const isContactActive = pathname === "/contact";
+
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -46,19 +48,23 @@ export function Navbar() {
             })}
           </nav>
 
-          {/* Contact CTA Button */}
+          {/* Desktop Speak With Us CTA */}
           <Link
             href="/contact"
-            className="hidden rounded-lg bg-cyan-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-cyan-700 lg:block"
+            className={`rounded-xl bg-gradient-to-r from-blue-600 to-sky-400 px-5 py-2.5 text-sm font-semibold text-white transition duration-300 hover:from-blue-700 hover:to-sky-500 ${
+              isContactActive
+                ? "border-4 border-blue-600 shadow-[0_0_0_3px_white,0_0_0_6px_#2d7ff5]"
+                : "border-4 border-transparent"
+            }`}
           >
-            Contact Us
+            Speak with us
           </Link>
 
           {/* Mobile Menu Button */}
           <button
             type="button"
             onClick={() => setOpen(!open)}
-            className="rounded-md p-2 text-slate-700 lg:hidden"
+            className="rounded-md p-2 text-slate-700 transition hover:bg-slate-100 lg:hidden"
             aria-label="Toggle navigation menu"
             aria-expanded={open}
           >
@@ -93,13 +99,17 @@ export function Navbar() {
                 );
               })}
 
-              {/* Mobile Contact CTA Button */}
+              {/* Mobile Speak With Us CTA */}
               <Link
                 href="/contact"
                 onClick={() => setOpen(false)}
-                className="mt-2 rounded-lg bg-cyan-600 px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-cyan-700"
+                className={`mx-1 mt-3 rounded-xl bg-gradient-to-r from-blue-600 to-sky-400 px-4 py-2.5 text-center text-sm font-semibold text-white transition duration-300 hover:from-blue-700 hover:to-sky-500 ${
+                  isContactActive
+                    ? "border-4 border-blue-600 shadow-[0_0_0_3px_white,0_0_0_6px_#2d7ff5]"
+                    : "border-4 border-transparent"
+                }`}
               >
-                Contact Us
+                Speak with us
               </Link>
             </nav>
           </div>
