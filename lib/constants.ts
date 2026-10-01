@@ -26,7 +26,7 @@ export const NAVIGATION: NavItem[] = [
   },
   {
     label: "Sister Concern",
-    href: "#",
+    href: "/buying-house",
   },
   {
     label: "Global Partners",
