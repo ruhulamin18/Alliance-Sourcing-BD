@@ -25,8 +25,8 @@ export const NAVIGATION: NavItem[] = [
     href: "/factory-machinery",
   },
   {
-    label: "Buying House",
-    href: "/buying-house",
+    label: "Sister Concern",
+    href: "#",
   },
   {
     label: "Global Partners",

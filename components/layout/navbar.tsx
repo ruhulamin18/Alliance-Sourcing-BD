@@ -15,15 +15,14 @@ export function Navbar() {
   const isContactActive = pathname === "/contact";
 
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-20 items-center justify-between">
-
+    <header className="sticky top-0 z-50 border-b border-slate-200 bg-white">
+      <div className="mx-auto max-w-[1800px] px-5 sm:px-6 lg:px-8">
+        <div className="flex h-[76px] items-center justify-between">
           {/* Logo */}
           <Logo />
 
           {/* Desktop Navigation */}
-          <nav className="hidden items-center gap-7 lg:flex">
+          <nav className="hidden items-center gap-8 lg:flex">
             {NAVIGATION.map((item) => {
               const isActive = pathname === item.href;
 
@@ -31,7 +30,7 @@ export function Navbar() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`relative text-base font-bold transition ${
+                  className={`relative text-[16px] font-semibold transition-colors duration-200 ${
                     isActive
                       ? "text-cyan-600"
                       : "text-slate-700 hover:text-cyan-600"
@@ -39,7 +38,6 @@ export function Navbar() {
                 >
                   {item.label}
 
-                  {/* Active navigation indicator */}
                   {isActive && (
                     <span className="absolute -bottom-2 left-0 h-0.5 w-full rounded-full bg-cyan-600" />
                   )}
@@ -48,23 +46,37 @@ export function Navbar() {
             })}
           </nav>
 
-          {/* Desktop Speak With Us CTA */}
+          {/* Contact Us */}
           <Link
             href="/contact"
-            className={`rounded-xl bg-gradient-to-r from-blue-600 to-sky-400 px-5 py-2.5 text-sm font-semibold text-white transition duration-300 hover:from-blue-700 hover:to-sky-500 ${
-              isContactActive
-                ? "border-4 border-blue-600 shadow-[0_0_0_3px_white,0_0_0_6px_#2d7ff5]"
-                : "border-4 border-transparent"
-            }`}
+            className={`
+              hidden
+              rounded-lg
+              bg-gradient-to-r from-blue-600 to-sky-400
+              px-6 py-3
+              text-sm font-bold
+              text-white
+              shadow-[0_6px_18px_rgba(59,130,246,0.25)]
+              transition-all duration-300
+              hover:-translate-y-0.5
+              hover:from-blue-700
+              hover:to-sky-500
+              lg:block
+              ${
+                isContactActive
+                  ? "ring-2 ring-blue-500 ring-offset-2"
+                  : ""
+              }
+            `}
           >
-            Speak with us
+            Contact Us
           </Link>
 
-          {/* Mobile Menu Button */}
+          {/* Mobile Menu */}
           <button
             type="button"
             onClick={() => setOpen(!open)}
-            className="rounded-md p-2 text-slate-700 transition hover:bg-slate-100 lg:hidden"
+            className="rounded-lg p-2 text-slate-700 transition hover:bg-slate-100 lg:hidden"
             aria-label="Toggle navigation menu"
             aria-expanded={open}
           >
@@ -78,7 +90,7 @@ export function Navbar() {
 
         {/* Mobile Navigation */}
         {open && (
-          <div className="border-t border-slate-200 py-4 lg:hidden">
+          <div className="border-t border-slate-200 py-3 lg:hidden">
             <nav className="flex flex-col gap-1">
               {NAVIGATION.map((item) => {
                 const isActive = pathname === item.href;
@@ -88,7 +100,7 @@ export function Navbar() {
                     key={item.href}
                     href={item.href}
                     onClick={() => setOpen(false)}
-                    className={`rounded-lg px-4 py-3 text-sm font-semibold transition ${
+                    className={`rounded-lg px-4 py-2.5 text-sm font-semibold transition ${
                       isActive
                         ? "bg-cyan-50 text-cyan-600"
                         : "text-slate-700 hover:bg-slate-50 hover:text-cyan-600"
@@ -99,17 +111,12 @@ export function Navbar() {
                 );
               })}
 
-              {/* Mobile Speak With Us CTA */}
               <Link
                 href="/contact"
                 onClick={() => setOpen(false)}
-                className={`mx-1 mt-3 rounded-xl bg-gradient-to-r from-blue-600 to-sky-400 px-4 py-2.5 text-center text-sm font-semibold text-white transition duration-300 hover:from-blue-700 hover:to-sky-500 ${
-                  isContactActive
-                    ? "border-4 border-blue-600 shadow-[0_0_0_3px_white,0_0_0_6px_#2d7ff5]"
-                    : "border-4 border-transparent"
-                }`}
+                className="mx-1 mt-2 rounded-lg bg-gradient-to-r from-blue-600 to-sky-400 px-4 py-2.5 text-center text-sm font-bold text-white transition hover:from-blue-700 hover:to-sky-500"
               >
-                Speak with us
+                Contact Us
               </Link>
             </nav>
           </div>
