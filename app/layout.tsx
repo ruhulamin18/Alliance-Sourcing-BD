@@ -7,6 +7,7 @@ import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { FloatingWhatsApp } from "@/components/common/floating-whatsapp";
 import { BackToTop } from "@/components/common/back-to-top";
+import { Preloader } from "@/components/common/preloader";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -28,7 +29,8 @@ export default function RootLayout({
   return (
     <html lang="en" className={montserrat.variable}>
       <body className="bg-white text-slate-900 antialiased">
-
+        <Preloader />
+        
         <Navbar />
 
         <main>{children}</main>
