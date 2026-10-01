@@ -1,136 +1,240 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import {
+  Mail,
+  Phone,
+  MapPin,
+  MessageCircle,
+} from "lucide-react";
 
 const quickLinks = [
-  { label: "About us", href: "/about" },
-  { label: "Our services", href: "/buying-house" },
-  { label: "Factory network", href: "/factory-machinery" },
-  { label: "Quality control", href: "/buying-house" },
-  { label: "Contact us", href: "/contact" },
+  { label: "Home", href: "/" },
+  { label: "About Us", href: "/about" },
+  { label: "Factory & Machinery", href: "/factory-machinery" },
+  { label: "Sister Concern", href: "#" },
+  { label: "Global Partners", href: "/global-partners" },
+  { label: "Contact Us", href: "/contact" },
 ];
 
 const socialLinks = [
   {
-    name: "Facebook",
-    href: "https://www.facebook.com/",
+    label: "Facebook",
+    href: "#",
     icon: "/icon/facebook.svg",
   },
   {
-    name: "Instagram",
-    href: "https://www.instagram.com/",
+    label: "Instagram",
+    href: "#",
     icon: "/icon/instagram.svg",
   },
   {
-    name: "X",
-    href: "https://x.com/",
-    icon: "/icon/x.svg",
-  },
-  {
-    name: "LinkedIn",
-    href: "https://www.linkedin.com/",
+    label: "LinkedIn",
+    href: "#",
     icon: "/icon/linkedin.svg",
   },
   {
-    name: "YouTube",
-    href: "https://www.youtube.com/",
+    label: "X",
+    href: "#",
+    icon: "/icon/x.svg",
+  },
+  {
+    label: "YouTube",
+    href: "#",
     icon: "/icon/youtube.svg",
   },
 ];
 
 export function Footer() {
   return (
-    <footer className="bg-black text-white">
-      <div className="mx-auto max-w-7xl px-6 pt-12 pb-8 sm:px-10 lg:px-12">
-
-        {/* =========================
-            Main Footer
-        ========================== */}
-        <div className="grid gap-12 lg:grid-cols-[1fr_190px]">
-
-          {/* =========================
-              Left Side
-          ========================== */}
+    <footer className="bg-[#0d172d] text-white">
+      <div className="mx-auto max-w-[1800px] px-6 py-10 sm:px-8 lg:px-12">
+        {/* Main Footer */}
+        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-[1.1fr_0.9fr_1.2fr_0.9fr] lg:gap-12">
+          {/* Company */}
           <div>
+            <div className="flex items-center gap-4">
+              {/* Alliance Apparel */}
+              <div className="flex items-center gap-2.5">
+                <div className="relative h-10 w-14 shrink-0">
+                  <Image
+                    src="/logo2.png"
+                    alt="Alliance Apparel Ltd."
+                    fill
+                    className="object-contain"
+                  />
+                </div>
 
-            {/* Logo */}
-            <Link
-              href="/"
-              className="inline-flex items-center gap-3"
-            >
-              <Image
-                src="/icon.svg"
-                alt="Alliance Sourcing BD"
-                width={55}
-                height={55}
-                className="h-[55px] w-[55px] object-contain"
-              />
-
-              <div className="flex flex-col leading-none">
-                <span className="text-xl font-extrabold tracking-tight text-white">
-                  ALLIANCE
-                </span>
-
-                <span className="mt-1 text-sm font-extrabold tracking-tight text-white">
-                  SOURCING BD
-                </span>
+                <div className="leading-[1.05]">
+                  <p className="text-[13px] font-bold text-white">
+                    ALLIANCE
+                  </p>
+                  <p className="text-[13px] font-bold text-white">
+                    APPARELS
+                  </p>
+                  <p className="text-[13px] font-bold text-white">
+                    LTD.
+                  </p>
+                </div>
               </div>
-            </Link>
 
-            {/* Address */}
-            <div className="mt-8">
-              <h3 className="text-base font-bold text-white">
-                Address
-              </h3>
+              {/* Divider */}
+              <div className="h-11 w-px bg-white/60" />
 
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300">
-                Asha Plaza (2nd floor), Hemayetpur, Savar, Dhaka, Bangladesh.
-              </p>
+              {/* Alliance Sourcing */}
+              <Link
+                href="/"
+                className="flex items-center gap-2.5"
+              >
+                <div className="relative h-11 w-11 shrink-0">
+                  <Image
+                    src="/icon.svg"
+                    alt="Alliance Sourcing BD"
+                    fill
+                    className="object-contain"
+                  />
+                </div>
+
+                <div className="leading-[1.05]">
+                  <p className="text-[13px] font-bold text-white">
+                    ALLIANCE
+                  </p>
+                  <p className="text-[13px] font-bold text-white">
+                    SOURCING
+                  </p>
+                  <p className="text-[13px] font-bold text-white">
+                    BD
+                  </p>
+                </div>
+              </Link>
             </div>
 
-            {/* Contact */}
-            <div className="mt-7">
-              <h3 className="text-base font-bold text-white">
-                Contact
-              </h3>
+            <p className="mt-5 max-w-[330px] text-sm leading-6 text-slate-400">
+              Your premier partner in seamless garment sourcing
+              and social manufacturing excellence.
+            </p>
+          </div>
 
-              <div className="mt-2 space-y-1">
+          {/* Quick Links */}
+          <div>
+            <h3 className="text-xl font-bold text-white">
+              Quick Links
+            </h3>
 
-                {/* Phone */}
-                <a
-                  href="tel:01716054044"
-                  className="block text-sm text-slate-300 transition hover:text-white"
+            <nav className="mt-5 flex flex-col gap-3.5">
+              {quickLinks.map((link) => (
+                <Link
+                  key={link.label}
+                  href={link.href}
+                  className="w-fit text-sm text-slate-400 transition-colors duration-200 hover:text-white"
                 >
-                  01716054044
-                </a>
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
+          </div>
 
-                {/* Email */}
-                <a
-                  href="mailto:faroque71@gmail.com"
-                  className="block text-sm text-slate-300 transition hover:text-white"
-                >
-                  faroque71@gmail.com
-                </a>
+          {/* Contact */}
+          <div>
+            <h3 className="text-xl font-bold text-white">
+              Contact
+            </h3>
 
+            <div className="mt-5 space-y-3.5 text-sm text-slate-400">
+              {/* Email 1 */}
+              <a
+                href="mailto:info@alliancebdltd.com"
+                className="flex items-center gap-3 transition-colors hover:text-white"
+              >
+                <Mail className="h-4 w-4 shrink-0" />
+                <span>info@alliancebdltd.com</span>
+              </a>
+
+              {/* Email 2 */}
+              <a
+                href="mailto:mansur@alliancebdltd.com"
+                className="flex items-center gap-3 transition-colors hover:text-white"
+              >
+                <Mail className="h-4 w-4 shrink-0" />
+                <span>mansur@alliancebdltd.com</span>
+              </a>
+
+              {/* Email 3 */}
+              <a
+                href="mailto:khan@alliancebdltd.com"
+                className="flex items-center gap-3 transition-colors hover:text-white"
+              >
+                <Mail className="h-4 w-4 shrink-0" />
+                <span>khan@alliancebdltd.com</span>
+              </a>
+
+              {/* Email 4 */}
+              <a
+                href="mailto:farooque@alliancebdltd.com"
+                className="flex items-center gap-3 transition-colors hover:text-white"
+              >
+                <Mail className="h-4 w-4 shrink-0" />
+                <span>farooque@alliancebdltd.com</span>
+              </a>
+
+              {/* Phone 1 */}
+              <a
+                href="tel:+8801972438732"
+                className="flex items-center gap-3 transition-colors hover:text-white"
+              >
+                <Phone className="h-4 w-4 shrink-0" />
+                <span>+880 1972-438732</span>
+              </a>
+
+              {/* Phone 2 */}
+              <a
+                href="tel:+8801714238182"
+                className="flex items-center gap-3 transition-colors hover:text-white"
+              >
+                <Phone className="h-4 w-4 shrink-0" />
+                <span>+880 171423-8182</span>
+              </a>
+
+              {/* Address */}
+              <div className="flex items-start gap-3 pt-1">
+                <MapPin className="mt-0.5 h-4 w-4 shrink-0" />
+
+                <p className="leading-6">
+                  Asha Plaza (2nd floor), Hemayetpur,
+                  <br />
+                  Savar, Dhaka, Bangladesh
+                </p>
               </div>
             </div>
+          </div>
 
-            {/* =========================
-                Social Icons
-            ========================== */}
-            <div className="mt-7 flex items-center gap-4">
+          {/* Connect */}
+          <div>
+            <h3 className="text-xl font-bold text-white">
+              Connect With Us
+            </h3>
+
+            {/* Social Icons */}
+            <div className="mt-5 flex items-center gap-3">
               {socialLinks.map((social) => (
                 <a
-                  key={social.name}
+                  key={social.label}
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label={social.name}
-                  title={social.name}
-                  className="flex h-9 w-9 items-center justify-center rounded-full bg-white transition duration-300 hover:-translate-y-1 hover:bg-slate-200"
+                  aria-label={social.label}
+                  className="
+                    flex h-10 w-10 items-center justify-center
+                    rounded-full bg-white
+                    transition-all duration-300
+                    hover:-translate-y-1
+                    hover:shadow-lg
+                  "
                 >
                   <Image
                     src={social.icon}
-                    alt={social.name}
+                    alt={social.label}
                     width={20}
                     height={20}
                     className="h-5 w-5 object-contain"
@@ -139,74 +243,83 @@ export function Footer() {
               ))}
             </div>
 
-          </div>
+            {/* Separator */}
+            <div className="mt-7 border-t border-white/10 pt-5">
+              <h4 className="text-base font-bold text-white">
+                Chat with us
+              </h4>
 
-          {/* =========================
-              Quick Links
-          ========================== */}
-          <div className="lg:justify-self-end lg:w-[190px]">
-
-            <h3 className="text-base font-bold text-white">
-              Quick Links
-            </h3>
-
-            <nav className="mt-7 flex flex-col gap-5">
-              {quickLinks.map((link) => (
-                <Link
-                  key={link.label}
-                  href={link.href}
-                  className="text-sm text-slate-300 transition hover:text-white"
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </nav>
-
+              <a
+                href="https://wa.me/8801972438732"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="
+                  mt-4 inline-flex items-center gap-2.5
+                  rounded-lg
+                  bg-green-600
+                  px-5 py-3
+                  text-sm font-bold text-white
+                  transition-all duration-300
+                  hover:bg-green-500
+                  hover:shadow-lg
+                "
+              >
+                <MessageCircle className="h-5 w-5" />
+                WhatsApp
+              </a>
+            </div>
           </div>
         </div>
 
-        {/* =========================
-            Bottom Footer
-        ========================== */}
-        <div className="mt-12 border-t border-slate-800 pt-5">
-
-          <div className="flex flex-col items-center justify-between gap-3 sm:flex-row">
-
+        {/* Bottom Divider */}
+        <div className="mt-9 border-t border-white/10 pt-5">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             {/* Copyright */}
-            <p className="text-xs text-slate-400">
-              © {new Date().getFullYear()} Alliance Sourcing BD
-            </p>
+            <div className="flex flex-wrap items-center gap-3 text-sm text-slate-400">
+              <span>
+                © 2026 Alliance Sourcing BD. All rights reserved.
+              </span>
+
+              <span className="hidden h-1 w-1 rounded-full bg-slate-500 sm:block" />
+
+              <span>
+                Developed by{" "}
+                <a
+                  href="https://github.com/ruhulamin18"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-semibold text-slate-300 transition-colors hover:text-white"
+                >
+                  Md. Ruhul Amin
+                </a>
+              </span>
+            </div>
 
             {/* Legal Links */}
-            <div className="flex flex-wrap items-center justify-center gap-6">
-
+            <div className="flex flex-wrap gap-5 text-sm text-slate-400">
               <Link
                 href="#"
-                className="text-xs text-slate-400 transition hover:text-white"
+                className="transition-colors hover:text-white"
               >
                 Privacy policy
               </Link>
 
               <Link
                 href="#"
-                className="text-xs text-slate-400 transition hover:text-white"
+                className="transition-colors hover:text-white"
               >
                 Terms of service
               </Link>
 
               <Link
                 href="#"
-                className="text-xs text-slate-400 transition hover:text-white"
+                className="transition-colors hover:text-white"
               >
                 Cookie settings
               </Link>
-
             </div>
-
           </div>
-
         </div>
-
       </div>
     </footer>
   );
