@@ -50,20 +50,67 @@ export function ProcessFlow() {
         {processSteps.map((step) => (
           <div
             key={step.title}
-            className="flex min-h-[125px] items-center gap-6 rounded-3xl border border-slate-200 bg-white px-7 py-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-md"
+            className="
+              group
+              flex
+              min-h-[125px]
+              items-center
+              gap-6
+              rounded-3xl
+              border
+              border-slate-200
+              bg-white
+              px-7
+              py-6
+              transition-colors
+              duration-300
+              hover:border-sky-500
+              hover:bg-sky-500
+            "
           >
             {/* Icon */}
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-sky-50 text-2xl">
+            <div
+              className="
+                flex
+                h-14
+                w-14
+                shrink-0
+                items-center
+                justify-center
+                rounded-2xl
+                bg-sky-50
+                text-2xl
+              "
+            >
               {step.icon}
             </div>
 
             {/* Content */}
             <div>
-              <h3 className="text-xl font-bold text-slate-900">
+              <h3
+                className="
+                  text-xl
+                  font-bold
+                  text-slate-900
+                  transition-colors
+                  duration-300
+                  group-hover:text-white
+                "
+              >
                 {step.title}
               </h3>
 
-              <p className="mt-2 text-base leading-6 text-slate-500">
+              <p
+                className="
+                  mt-2
+                  text-base
+                  leading-6
+                  text-slate-500
+                  transition-colors
+                  duration-300
+                  group-hover:text-white
+                "
+              >
                 {step.description}
               </p>
             </div>

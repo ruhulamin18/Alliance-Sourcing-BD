@@ -5,25 +5,21 @@ const services = [
     icon: "📦",
     title: "Product development and sampling",
     description: "We find and shortlist your ideal results",
-    active: true,
   },
   {
     icon: "🔍",
     title: "Supplier selection and evaluation",
     description: "We find and shortlist your best factories",
-    active: false,
   },
   {
     icon: "💰",
     title: "Price negotiation and order placement",
     description: "We secure the best terms for your orders",
-    active: false,
   },
   {
     icon: "🏭",
     title: "Production follow-up and quality inspection",
     description: "We monitor every batch from loom to shipment",
-    active: false,
   },
 ];
 
@@ -50,11 +46,17 @@ export function BuyingHouseServices() {
         {services.map((service) => (
           <div
             key={service.title}
-            className={`min-h-[200px] rounded-2xl border p-8 transition duration-300 hover:-translate-y-1 hover:shadow-lg ${
-              service.active
-                ? "border-sky-500 bg-sky-500 text-white shadow-lg"
-                : "border-slate-200 bg-white text-slate-900"
-            }`}
+            className="
+              group
+              min-h-[200px]
+              rounded-2xl
+              border border-slate-200
+              bg-white
+              p-8
+              transition-colors duration-300
+              hover:border-sky-500
+              hover:bg-sky-500
+            "
           >
             {/* Icon */}
             <div className="text-3xl">
@@ -63,18 +65,28 @@ export function BuyingHouseServices() {
 
             {/* Title */}
             <h3
-              className={`mt-7 text-xl font-bold ${
-                service.active ? "text-white" : "text-slate-900"
-              }`}
+              className="
+                mt-7
+                text-xl
+                font-bold
+                text-slate-900
+                transition-colors duration-300
+                group-hover:text-white
+              "
             >
               {service.title}
             </h3>
 
             {/* Description */}
             <p
-              className={`mt-3 text-base leading-7 ${
-                service.active ? "text-white" : "text-slate-500"
-              }`}
+              className="
+                mt-3
+                text-base
+                leading-7
+                text-slate-500
+                transition-colors duration-300
+                group-hover:text-white
+              "
             >
               {service.description}
             </p>

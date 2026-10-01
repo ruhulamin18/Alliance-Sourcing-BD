@@ -46,7 +46,17 @@ export function FeaturesGrid() {
         {features.map((feature) => (
           <div
             key={feature.title}
-            className="min-h-[220px] rounded-2xl border border-slate-200 bg-white px-7 py-8 transition duration-300 hover:-translate-y-1 hover:shadow-md"
+            className="
+              group
+              min-h-[220px]
+              rounded-2xl
+              border border-slate-200
+              bg-white
+              px-7 py-8
+              transition-colors duration-300
+              hover:border-sky-500
+              hover:bg-sky-500
+            "
           >
             {/* Icon */}
             <div className="text-3xl">
@@ -54,12 +64,30 @@ export function FeaturesGrid() {
             </div>
 
             {/* Title */}
-            <h3 className="mt-7 text-xl font-bold text-slate-900">
+            <h3
+              className="
+                mt-7
+                text-xl
+                font-bold
+                text-slate-900
+                transition-colors duration-300
+                group-hover:text-white
+              "
+            >
               {feature.title}
             </h3>
 
             {/* Description */}
-            <p className="mt-4 text-base leading-7 text-slate-500">
+            <p
+              className="
+                mt-4
+                text-base
+                leading-7
+                text-slate-500
+                transition-colors duration-300
+                group-hover:text-white
+              "
+            >
               {feature.description}
             </p>
           </div>
