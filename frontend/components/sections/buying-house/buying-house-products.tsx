@@ -12,12 +12,20 @@ interface Product {
   description: string | null;
   image: string | null;
   category: string | null;
+  subcategory: string | null;
   isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface ProductSubcategory {
+  title: string;
+  products: Product[];
 }
 
 interface ProductCategory {
   title: string;
-  products: Product[];
+  subcategories: ProductSubcategory[];
 }
 
 export function BuyingHouseProducts() {
@@ -41,7 +49,9 @@ export function BuyingHouseProducts() {
           );
         }
 
-        setProducts(result.data || []);
+        // Backend response:
+        // { success: true, products: [...] }
+        setProducts(result.products || []);
       } catch (error) {
         setError(
           error instanceof Error
@@ -56,25 +66,49 @@ export function BuyingHouseProducts() {
     fetchProducts();
   }, []);
 
+  /*
+   * Category → Subcategory → Products
+   *
+   * The backend sends products in createdAt ASC order.
+   * We preserve that order here.
+   */
   const productCategories = useMemo<ProductCategory[]>(() => {
-    const groupedProducts: Record<string, Product[]> = {};
+    const categoryMap = new Map<
+      string,
+      Map<string, Product[]>
+    >();
 
     products
       .filter((product) => product.isActive)
       .forEach((product) => {
-        const category = product.category?.trim() || "Other";
+        const category =
+          product.category?.trim() || "Other";
 
-        if (!groupedProducts[category]) {
-          groupedProducts[category] = [];
+        const subcategory =
+          product.subcategory?.trim() || "Other";
+
+        if (!categoryMap.has(category)) {
+          categoryMap.set(category, new Map());
         }
 
-        groupedProducts[category].push(product);
+        const subcategoryMap = categoryMap.get(category)!;
+
+        if (!subcategoryMap.has(subcategory)) {
+          subcategoryMap.set(subcategory, []);
+        }
+
+        subcategoryMap.get(subcategory)!.push(product);
       });
 
-    return Object.entries(groupedProducts).map(
-      ([category, products]) => ({
+    return Array.from(categoryMap.entries()).map(
+      ([category, subcategoryMap]) => ({
         title: category,
-        products,
+        subcategories: Array.from(
+          subcategoryMap.entries()
+        ).map(([subcategory, products]) => ({
+          title: subcategory,
+          products,
+        })),
       })
     );
   }, [products]);
@@ -82,6 +116,7 @@ export function BuyingHouseProducts() {
   return (
     <section className="bg-white py-16 sm:py-20 lg:py-24">
       <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-10">
+
         {/* Section Heading */}
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl">
@@ -89,8 +124,8 @@ export function BuyingHouseProducts() {
           </h2>
 
           <p className="mt-4 text-base leading-7 text-slate-500 sm:text-lg">
-            Explore our wide range of high-quality products across different
-            categories and subcategories.
+            Explore our wide range of high-quality products
+            across different categories and subcategories.
           </p>
         </div>
 
@@ -113,80 +148,121 @@ export function BuyingHouseProducts() {
         )}
 
         {/* Empty State */}
-        {!loading && !error && productCategories.length === 0 && (
-          <div className="mt-16 text-center">
-            <p className="text-sm text-slate-500">
-              No products available at the moment.
-            </p>
-          </div>
-        )}
+        {!loading &&
+          !error &&
+          productCategories.length === 0 && (
+            <div className="mt-16 text-center">
+              <p className="text-sm text-slate-500">
+                No products available at the moment.
+              </p>
+            </div>
+          )}
 
-        {/* Product Categories */}
-        {!loading && !error && productCategories.length > 0 && (
-          <div className="mt-16 space-y-12">
-            {productCategories.map((category) => (
-              <div key={category.title}>
-                {/* Main Category */}
-                <h3 className="text-3xl font-bold tracking-tight text-slate-900">
-                  {category.title}
-                </h3>
+        {/* Categories */}
+        {!loading &&
+          !error &&
+          productCategories.length > 0 && (
+            <div className="mt-16 space-y-16">
 
-                {/* Product Grid */}
-                <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-                  {category.products.map((product) => (
-                    <div
-                      key={product.id}
-                      className="
-                        group
-                        overflow-hidden
-                        rounded-xl
-                        border border-slate-200
-                        bg-white
-                        transition-all duration-300
-                        hover:-translate-y-1
-                        hover:shadow-lg
-                      "
-                    >
-                      {/* Product Image */}
-                      <div className="relative flex h-48 items-center justify-center overflow-hidden bg-white sm:h-52">
-                        {product.image ? (
-                          <Image
-                            src={product.image}
-                            alt={product.name}
-                            fill
-                            className="
-                              object-contain
-                              p-3
-                              transition-transform duration-500
-                              group-hover:scale-105
-                            "
-                            unoptimized
-                          />
-                        ) : (
-                          <div className="flex h-full w-full items-center justify-center bg-slate-50">
-                            <span className="text-xs text-slate-400">
-                              No Image
-                            </span>
+              {productCategories.map((category) => (
+                <div key={category.title}>
+
+                  {/* Main Category */}
+                  <h3 className="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
+                    {category.title}
+                  </h3>
+
+                  <div className="mt-8 space-y-12">
+
+                    {/* Subcategories */}
+                    {category.subcategories.map(
+                      (subcategory) => (
+                        <div
+                          key={`${category.title}-${subcategory.title}`}
+                        >
+
+                          {/* Subcategory Heading */}
+                          <div className="flex items-center gap-4">
+                            <h4 className="shrink-0 text-2xl font-semibold text-slate-800">
+                              {subcategory.title}
+                            </h4>
+
+                            <div className="h-px flex-1 bg-slate-200" />
                           </div>
-                        )}
-                      </div>
 
-                      {/* Product Name */}
-                      <div className="px-4 pb-4 pt-2 text-center">
-                        <p className="truncate text-xs font-semibold text-slate-700 sm:text-sm">
-                          {product.name}
-                        </p>
+                          {/* Products */}
+                          <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
 
-                        {/* Cyan Underline */}
-                        <div className="mx-auto mt-2 h-0.5 w-6 bg-cyan-400 transition-all duration-300 group-hover:w-10" />
-                      </div>
-                    </div>
-                  ))}
+                            {subcategory.products.map(
+                              (product) => (
+                                <div
+                                  key={product.id}
+                                  className="
+                                    group
+                                    overflow-hidden
+                                    rounded-xl
+                                    border
+                                    border-slate-200
+                                    bg-white
+                                    transition-all
+                                    duration-300
+                                    hover:-translate-y-1
+                                    hover:shadow-lg
+                                  "
+                                >
+
+                                  {/* Product Image */}
+                                  <div className="relative flex h-48 items-center justify-center overflow-hidden bg-white sm:h-52">
+
+                                    {product.image ? (
+                                      <Image
+                                        src={product.image}
+                                        alt={product.name}
+                                        fill
+                                        className="
+                                          object-contain
+                                          p-3
+                                          transition-transform
+                                          duration-500
+                                          group-hover:scale-105
+                                        "
+                                        unoptimized
+                                      />
+                                    ) : (
+                                      <div className="flex h-full w-full items-center justify-center bg-slate-50">
+                                        <span className="text-xs text-slate-400">
+                                          No Image
+                                        </span>
+                                      </div>
+                                    )}
+
+                                  </div>
+
+                                  {/* Product Name */}
+                                  <div className="px-4 pb-4 pt-2 text-center">
+                                    <p className="truncate text-xs font-semibold text-slate-700 sm:text-sm">
+                                      {product.name}
+                                    </p>
+
+                                    {/* Cyan Underline */}
+                                    <div className="mx-auto mt-2 h-0.5 w-6 bg-cyan-400 transition-all duration-300 group-hover:w-10" />
+                                  </div>
+
+                                </div>
+                              )
+                            )}
+
+                          </div>
+                        </div>
+                      )
+                    )}
+
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+
+            </div>
+          )}
       </div>
     </section>
   );
