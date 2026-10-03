@@ -6,58 +6,96 @@ import {
   deleteProduct,
 } from "../services/product.service.js";
 
-// Create Product
+// ==========================================
+// CREATE PRODUCT
+// ==========================================
 export const createProductController = async (req, res) => {
   try {
-    const { name, category } = req.body;
+    const {
+      name,
+      category,
+      subcategory,
+      description,
+      image,
+      isActive,
+    } = req.body;
 
-    if (!name || !category) {
+    if (!name?.trim()) {
       return res.status(400).json({
         success: false,
-        message: "Product name and category are required",
+        message: "Product name is required",
       });
     }
 
-    const product = await createProduct(req.body);
+    if (!category?.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Category is required",
+      });
+    }
 
-    res.status(201).json({
+    const product = await createProduct({
+      name: name.trim(),
+      category: category.trim(),
+      subcategory: subcategory?.trim() || null,
+      description: description?.trim() || null,
+      image: image?.trim() || null,
+      isActive: isActive ?? true,
+    });
+
+    return res.status(201).json({
       success: true,
       message: "Product created successfully",
       product,
     });
   } catch (error) {
-    console.error("Create Product Error:", error);
+    console.error("CREATE PRODUCT ERROR:");
+    console.error(error);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
-      message: "Failed to create product",
+      message: error.message || "Failed to create product",
     });
   }
 };
 
-// Get All Products
+// ==========================================
+// GET ALL PRODUCTS
+// ==========================================
 export const getProductsController = async (req, res) => {
   try {
     const products = await getAllProducts();
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       products,
     });
   } catch (error) {
-    console.error("Get Products Error:", error);
+    console.error("GET PRODUCTS ERROR:");
+    console.error(error);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
-      message: "Failed to fetch products",
+      message: error.message || "Failed to fetch products",
     });
   }
 };
 
-// Get Single Product
+// ==========================================
+// GET SINGLE PRODUCT
+// ==========================================
 export const getProductController = async (req, res) => {
   try {
-    const product = await getProductById(req.params.id);
+    const id = Number(req.params.id);
+
+    if (!Number.isInteger(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid product ID",
+      });
+    }
+
+    const product = await getProductById(id);
 
     if (!product) {
       return res.status(404).json({
@@ -66,24 +104,43 @@ export const getProductController = async (req, res) => {
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       product,
     });
   } catch (error) {
-    console.error("Get Product Error:", error);
+    console.error("GET PRODUCT ERROR:");
+    console.error(error);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
-      message: "Failed to fetch product",
+      message: error.message || "Failed to fetch product",
     });
   }
 };
 
-// Update Product
+// ==========================================
+// UPDATE PRODUCT
+// ==========================================
 export const updateProductController = async (req, res) => {
   try {
-    const existingProduct = await getProductById(req.params.id);
+    const id = Number(req.params.id);
+
+    console.log("=================================");
+    console.log("UPDATE PRODUCT REQUEST");
+    console.log("Product ID:", id);
+    console.log("Request Body:", req.body);
+    console.log("=================================");
+
+    if (!Number.isInteger(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid product ID",
+      });
+    }
+
+    // Check product exists
+    const existingProduct = await getProductById(id);
 
     if (!existingProduct) {
       return res.status(404).json({
@@ -92,30 +149,78 @@ export const updateProductController = async (req, res) => {
       });
     }
 
-    const product = await updateProduct(
-      req.params.id,
-      req.body
-    );
+    const {
+      name,
+      category,
+      subcategory,
+      description,
+      image,
+      isActive,
+    } = req.body;
 
-    res.status(200).json({
+    // Validation
+    if (!name?.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Product name is required",
+      });
+    }
+
+    if (!category?.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Category is required",
+      });
+    }
+
+    const updatedProduct = await updateProduct(id, {
+      name: name.trim(),
+      category: category.trim(),
+      subcategory: subcategory?.trim() || null,
+      description: description?.trim() || null,
+      image: image?.trim() || null,
+      isActive:
+        typeof isActive === "boolean"
+          ? isActive
+          : existingProduct.isActive,
+    });
+
+    console.log("PRODUCT UPDATED:");
+    console.log(updatedProduct);
+
+    return res.status(200).json({
       success: true,
       message: "Product updated successfully",
-      product,
+      product: updatedProduct,
     });
   } catch (error) {
-    console.error("Update Product Error:", error);
+    console.error("=================================");
+    console.error("UPDATE PRODUCT ERROR");
+    console.error(error);
+    console.error("=================================");
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
-      message: "Failed to update product",
+      message: error.message || "Failed to update product",
     });
   }
 };
 
-// Delete Product
+// ==========================================
+// DELETE PRODUCT
+// ==========================================
 export const deleteProductController = async (req, res) => {
   try {
-    const existingProduct = await getProductById(req.params.id);
+    const id = Number(req.params.id);
+
+    if (!Number.isInteger(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid product ID",
+      });
+    }
+
+    const existingProduct = await getProductById(id);
 
     if (!existingProduct) {
       return res.status(404).json({
@@ -124,18 +229,19 @@ export const deleteProductController = async (req, res) => {
       });
     }
 
-    await deleteProduct(req.params.id);
+    await deleteProduct(id);
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "Product deleted successfully",
     });
   } catch (error) {
-    console.error("Delete Product Error:", error);
+    console.error("DELETE PRODUCT ERROR:");
+    console.error(error);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
-      message: "Failed to delete product",
+      message: error.message || "Failed to delete product",
     });
   }
 };

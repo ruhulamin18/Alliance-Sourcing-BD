@@ -15,7 +15,6 @@ export const createProduct = async (data) => {
 };
 
 // Get All Products
-// Old → New order
 export const getAllProducts = async () => {
   return await prisma.product.findMany({
     orderBy: {
@@ -45,7 +44,7 @@ export const updateProduct = async (id, data) => {
       image: data.image || null,
       category: data.category,
       subcategory: data.subcategory || null,
-      isActive: data.isActive,
+      isActive: data.isActive ?? true,
     },
   });
 };

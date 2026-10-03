@@ -1,6 +1,12 @@
 "use client";
 
-import { ChangeEvent, FormEvent, useEffect, useState } from "react";
+import {
+  ChangeEvent,
+  FormEvent,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 
 const API_URL =
@@ -46,17 +52,22 @@ export default function AdminProductsPage() {
 
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const formRef = useRef<HTMLDivElement>(null);
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
+  // ================================
   // Fetch Products
+  // ================================
   const fetchProducts = async () => {
     try {
       setLoading(true);
       setError("");
 
-      const response = await fetch(`${API_URL}/api/products`);
+      const response = await fetch(`${API_URL}/api/products`, {
+        cache: "no-store",
+      });
 
       const result = await response.json();
 
@@ -67,9 +78,14 @@ export default function AdminProductsPage() {
       }
 
       // Backend response:
-      // { success: true, products: [...] }
+      // {
+      //   success: true,
+      //   products: [...]
+      // }
       setProducts(result.products || []);
     } catch (error) {
+      console.error("Fetch Products Error:", error);
+
       setError(
         error instanceof Error
           ? error.message
@@ -84,14 +100,27 @@ export default function AdminProductsPage() {
     fetchProducts();
   }, []);
 
+  useEffect(() => {
+    if (showForm && editingId !== null) {
+      formRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
+  }, [editingId, showForm]);
+
+  // ================================
   // Reset Form
+  // ================================
   const resetForm = () => {
     setForm(initialForm);
     setEditingId(null);
     setShowForm(false);
   };
 
+  // ================================
   // Image Upload
+  // ================================
   const handleImageUpload = async (
     event: ChangeEvent<HTMLInputElement>
   ) => {
@@ -111,6 +140,7 @@ export default function AdminProductsPage() {
       }
 
       const formData = new FormData();
+
       formData.append("image", file);
 
       const response = await fetch(`${API_URL}/api/upload`, {
@@ -129,13 +159,22 @@ export default function AdminProductsPage() {
         );
       }
 
+      const uploadedImage =
+        result.data?.url || result.url || "";
+
+      if (!uploadedImage) {
+        throw new Error("Image URL was not returned");
+      }
+
       setForm((currentForm) => ({
         ...currentForm,
-        image: result.data?.url || result.url || "",
+        image: uploadedImage,
       }));
 
       setSuccess("Image uploaded successfully.");
     } catch (error) {
+      console.error("Image Upload Error:", error);
+
       setError(
         error instanceof Error
           ? error.message
@@ -147,14 +186,18 @@ export default function AdminProductsPage() {
     }
   };
 
+  // ================================
   // Create / Update Product
+  // ================================
   const handleSubmit = async (
     event: FormEvent<HTMLFormElement>
   ) => {
     event.preventDefault();
 
     if (uploading) {
-      setError("Please wait until the image upload is complete.");
+      setError(
+        "Please wait until the image upload is complete."
+      );
       return;
     }
 
@@ -169,11 +212,32 @@ export default function AdminProductsPage() {
         throw new Error("Authentication required");
       }
 
-      const url = editingId
+      // Explicit payload
+      const payload = {
+        name: form.name.trim(),
+        description: form.description.trim(),
+        image: form.image.trim(),
+        category: form.category.trim(),
+        subcategory: form.subcategory.trim(),
+        isActive: form.isActive,
+      };
+
+      // Validation
+      if (!payload.name) {
+        throw new Error("Product name is required");
+      }
+
+      if (!payload.category) {
+        throw new Error("Category is required");
+      }
+
+      const isEditing = editingId !== null;
+
+      const url = isEditing
         ? `${API_URL}/api/products/${editingId}`
         : `${API_URL}/api/products`;
 
-      const method = editingId ? "PUT" : "POST";
+      const method = isEditing ? "PUT" : "POST";
 
       const response = await fetch(url, {
         method,
@@ -181,7 +245,7 @@ export default function AdminProductsPage() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       });
 
       const result = await response.json();
@@ -193,15 +257,21 @@ export default function AdminProductsPage() {
       }
 
       setSuccess(
-        editingId
+        isEditing
           ? "Product updated successfully."
           : "Product created successfully."
       );
 
-      resetForm();
+      // Close form
+      setForm(initialForm);
+      setEditingId(null);
+      setShowForm(false);
 
+      // Refresh product list
       await fetchProducts();
     } catch (error) {
+      console.error("Product Save Error:", error);
+
       setError(
         error instanceof Error
           ? error.message
@@ -212,17 +282,19 @@ export default function AdminProductsPage() {
     }
   };
 
+  // ================================
   // Edit Product
+  // ================================
   const handleEdit = (product: Product) => {
     setEditingId(product.id);
 
     setForm({
-      name: product.name,
+      name: product.name || "",
       description: product.description || "",
       image: product.image || "",
       category: product.category || "",
       subcategory: product.subcategory || "",
-      isActive: product.isActive,
+      isActive: product.isActive ?? true,
     });
 
     setShowForm(true);
@@ -230,7 +302,9 @@ export default function AdminProductsPage() {
     setSuccess("");
   };
 
+  // ================================
   // Delete Product
+  // ================================
   const handleDelete = async (id: number) => {
     const confirmed = window.confirm(
       "Are you sure you want to delete this product?"
@@ -270,6 +344,8 @@ export default function AdminProductsPage() {
 
       await fetchProducts();
     } catch (error) {
+      console.error("Delete Product Error:", error);
+
       setError(
         error instanceof Error
           ? error.message
@@ -278,11 +354,16 @@ export default function AdminProductsPage() {
     }
   };
 
+  // ================================
+  // Render
+  // ================================
   return (
     <AdminLayout>
       <div className="space-y-6">
 
-        {/* Header */}
+        {/* ================================
+            Header
+        ================================= */}
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div>
             <h2 className="text-2xl font-bold text-slate-800">
@@ -309,28 +390,40 @@ export default function AdminProductsPage() {
           </button>
         </div>
 
-        {/* Error */}
+        {/* ================================
+            Error Message
+        ================================= */}
         {error && (
           <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
             {error}
           </div>
         )}
 
-        {/* Success */}
+        {/* ================================
+            Success Message
+        ================================= */}
         {success && (
           <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
             {success}
           </div>
         )}
 
-        {/* Form */}
+        {/* ================================
+            Add / Edit Form
+        ================================= */}
         {showForm && (
-          <div className="rounded-xl border border-slate-200 bg-white p-6">
+          <div
+            ref={formRef}
+            className="scroll-mt-6 rounded-xl border border-slate-200 bg-white p-6"
+          >
 
+            {/* Form Header */}
             <div className="mb-6 flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-bold text-slate-800">
-                  {editingId ? "Edit Product" : "Add Product"}
+                  {editingId
+                    ? "Edit Product"
+                    : "Add Product"}
                 </h3>
 
                 <p className="mt-1 text-sm text-slate-500">
@@ -349,7 +442,10 @@ export default function AdminProductsPage() {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form
+              onSubmit={handleSubmit}
+              className="space-y-5"
+            >
 
               {/* Product Name */}
               <div>
@@ -449,7 +545,7 @@ export default function AdminProductsPage() {
                 />
               </div>
 
-              {/* Image */}
+              {/* Product Image */}
               <div>
                 <label
                   htmlFor="product-image"
@@ -488,7 +584,7 @@ export default function AdminProductsPage() {
                 )}
               </div>
 
-              {/* Active */}
+              {/* Active Product */}
               <label className="flex cursor-pointer items-center gap-3">
                 <input
                   type="checkbox"
@@ -507,8 +603,9 @@ export default function AdminProductsPage() {
                 </span>
               </label>
 
-              {/* Buttons */}
+              {/* Form Buttons */}
               <div className="flex gap-3">
+
                 <button
                   type="submit"
                   disabled={saving || uploading}
@@ -528,35 +625,46 @@ export default function AdminProductsPage() {
                 >
                   Cancel
                 </button>
+
               </div>
             </form>
           </div>
         )}
 
-        {/* Product List */}
+        {/* ================================
+            Product List
+        ================================= */}
         <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
 
+          {/* Loading */}
           {loading ? (
             <div className="p-8 text-center text-sm text-slate-500">
               Loading products...
             </div>
+
           ) : products.length === 0 ? (
+
+            /* Empty */
             <div className="p-8 text-center">
               <p className="text-sm font-medium text-slate-600">
                 No products found
               </p>
 
               <p className="mt-1 text-xs text-slate-400">
-                Click &quot;Add Product&quot; to create your first
-                product.
+                Click &quot;Add Product&quot; to create your
+                first product.
               </p>
             </div>
+
           ) : (
+
+            /* Table */
             <div className="overflow-x-auto">
               <table className="w-full min-w-[1150px]">
 
                 <thead className="border-b border-slate-200 bg-slate-50">
                   <tr>
+
                     <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
                       Product
                     </th>
@@ -580,15 +688,18 @@ export default function AdminProductsPage() {
                     <th className="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">
                       Actions
                     </th>
+
                   </tr>
                 </thead>
 
                 <tbody className="divide-y divide-slate-100">
+
                   {products.map((product) => (
                     <tr
                       key={product.id}
                       className="hover:bg-slate-50"
                     >
+
                       {/* Product */}
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
@@ -608,20 +719,23 @@ export default function AdminProductsPage() {
                           <p className="text-sm font-semibold text-slate-800">
                             {product.name}
                           </p>
+
                         </div>
                       </td>
 
                       {/* Category */}
                       <td className="px-6 py-4">
                         <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
-                          {product.category || "Uncategorized"}
+                          {product.category ||
+                            "Uncategorized"}
                         </span>
                       </td>
 
                       {/* Subcategory */}
                       <td className="px-6 py-4">
                         <span className="rounded-full bg-cyan-50 px-3 py-1 text-xs font-medium text-cyan-700">
-                          {product.subcategory || "Not set"}
+                          {product.subcategory ||
+                            "Not set"}
                         </span>
                       </td>
 
@@ -672,13 +786,15 @@ export default function AdminProductsPage() {
 
                         </div>
                       </td>
+
                     </tr>
                   ))}
-                </tbody>
 
+                </tbody>
               </table>
             </div>
           )}
+
         </div>
       </div>
     </AdminLayout>

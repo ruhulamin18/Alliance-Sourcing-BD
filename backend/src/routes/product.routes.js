@@ -12,13 +12,22 @@ import { protect } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
 
-// Public
+// ==========================================
+// PUBLIC
+// ==========================================
+
 router.get("/", getProductsController);
+
 router.get("/:id", getProductController);
 
-// Admin
+// ==========================================
+// ADMIN
+// ==========================================
+
 router.post("/", protect, createProductController);
+
 router.put("/:id", protect, updateProductController);
+
 router.delete("/:id", protect, deleteProductController);
 
 export default router;
