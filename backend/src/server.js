@@ -9,6 +9,7 @@ import productRoutes from "./routes/product.routes.js";
 import factoryRoutes from "./routes/factory.routes.js";
 import machineryRoutes from "./routes/machinery.routes.js";
 import partnerRoutes from "./routes/partner.routes.js";
+import dashboardRoutes from "./routes/dashboard.routes.js";
 
 const app = express();
 
@@ -36,6 +37,7 @@ app.use("/api/products", productRoutes);
 app.use("/api/factories", factoryRoutes);
 app.use("/api/machineries", machineryRoutes);
 app.use("/api/partners", partnerRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
 const PORT = process.env.PORT || 5000;
 
