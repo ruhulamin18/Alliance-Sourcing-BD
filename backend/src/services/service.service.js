@@ -15,7 +15,7 @@ export const createService = async (data) => {
 export const getAllServices = async () => {
   return await prisma.service.findMany({
     orderBy: {
-      createdAt: "desc",
+      createdAt: "asc",
     },
   });
 };
