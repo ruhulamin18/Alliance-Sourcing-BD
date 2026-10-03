@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 
 const API_URL =
@@ -36,13 +36,11 @@ const initialForm: ProductForm = {
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [form, setForm] = useState<ProductForm>(initialForm);
-
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-
+  const [uploading, setUploading] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
-
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
@@ -81,10 +79,70 @@ export default function AdminProductsPage() {
     setShowForm(false);
   };
 
+  const handleImageUpload = async (
+    event: ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+
+    if (!file) return;
+
+    setError("");
+    setSuccess("");
+    setUploading(true);
+
+    try {
+      const token = localStorage.getItem("adminToken");
+
+      if (!token) {
+        throw new Error("Authentication required");
+      }
+
+      const formData = new FormData();
+      formData.append("image", file);
+
+      const response = await fetch(`${API_URL}/api/upload`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          result.message || "Failed to upload image"
+        );
+      }
+
+      setForm((currentForm) => ({
+        ...currentForm,
+        image: result.data.url,
+      }));
+
+      setSuccess("Image uploaded successfully.");
+    } catch (error) {
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Failed to upload image"
+      );
+    } finally {
+      setUploading(false);
+      event.target.value = "";
+    }
+  };
+
   const handleSubmit = async (
     event: FormEvent<HTMLFormElement>
   ) => {
     event.preventDefault();
+
+    if (uploading) {
+      setError("Please wait until the image upload is complete.");
+      return;
+    }
 
     try {
       setSaving(true);
@@ -160,9 +218,7 @@ export default function AdminProductsPage() {
       "Are you sure you want to delete this product?"
     );
 
-    if (!confirmed) {
-      return;
-    }
+    if (!confirmed) return;
 
     try {
       setError("");
@@ -207,7 +263,6 @@ export default function AdminProductsPage() {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        {/* Header */}
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div>
             <h2 className="text-2xl font-bold text-slate-800">
@@ -234,7 +289,6 @@ export default function AdminProductsPage() {
           </button>
         </div>
 
-        {/* Messages */}
         {error && (
           <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
             {error}
@@ -247,7 +301,6 @@ export default function AdminProductsPage() {
           </div>
         )}
 
-        {/* Form */}
         {showForm && (
           <div className="rounded-xl border border-slate-200 bg-white p-6">
             <div className="mb-6 flex items-center justify-between">
@@ -272,11 +325,7 @@ export default function AdminProductsPage() {
               </button>
             </div>
 
-            <form
-              onSubmit={handleSubmit}
-              className="space-y-5"
-            >
-              {/* Product Name */}
+            <form onSubmit={handleSubmit} className="space-y-5">
               <div>
                 <label
                   htmlFor="product-name"
@@ -301,7 +350,6 @@ export default function AdminProductsPage() {
                 />
               </div>
 
-              {/* Category */}
               <div>
                 <label
                   htmlFor="product-category"
@@ -325,7 +373,6 @@ export default function AdminProductsPage() {
                 />
               </div>
 
-              {/* Description */}
               <div>
                 <label
                   htmlFor="product-description"
@@ -349,31 +396,44 @@ export default function AdminProductsPage() {
                 />
               </div>
 
-              {/* Image */}
               <div>
                 <label
                   htmlFor="product-image"
                   className="mb-2 block text-sm font-medium text-slate-700"
                 >
-                  Image Path
+                  Product Image
                 </label>
 
                 <input
                   id="product-image"
-                  type="text"
-                  value={form.image}
-                  onChange={(event) =>
-                    setForm({
-                      ...form,
-                      image: event.target.value,
-                    })
-                  }
-                  placeholder="/images/products/product.jpg"
-                  className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  disabled={uploading}
+                  className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm text-slate-700 file:mr-4 file:rounded-md file:border-0 file:bg-cyan-50 file:px-4 file:py-2 file:text-sm file:font-medium file:text-cyan-700 hover:file:bg-cyan-100 disabled:cursor-not-allowed disabled:opacity-60"
                 />
+
+                {uploading && (
+                  <p className="mt-2 text-sm text-cyan-600">
+                    Uploading image...
+                  </p>
+                )}
+
+                {form.image && !uploading && (
+                  <div className="mt-4">
+                    <p className="mb-2 text-xs font-medium text-slate-500">
+                      Image Preview
+                    </p>
+
+                    <img
+                      src={form.image}
+                      alt="Product preview"
+                      className="h-32 w-32 rounded-lg border border-slate-200 object-cover"
+                    />
+                  </div>
+                )}
               </div>
 
-              {/* Active */}
               <label className="flex cursor-pointer items-center gap-3">
                 <input
                   type="checkbox"
@@ -392,11 +452,10 @@ export default function AdminProductsPage() {
                 </span>
               </label>
 
-              {/* Submit */}
               <div className="flex gap-3">
                 <button
                   type="submit"
-                  disabled={saving}
+                  disabled={saving || uploading}
                   className="rounded-lg bg-cyan-600 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-cyan-700 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {saving
@@ -418,7 +477,6 @@ export default function AdminProductsPage() {
           </div>
         )}
 
-        {/* Products */}
         <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
           {loading ? (
             <div className="p-8 text-center text-sm text-slate-500">
@@ -437,7 +495,7 @@ export default function AdminProductsPage() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[1000px]">
+              <table className="w-full min-w-[1050px]">
                 <thead className="border-b border-slate-200 bg-slate-50">
                   <tr>
                     <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
@@ -469,9 +527,23 @@ export default function AdminProductsPage() {
                       className="hover:bg-slate-50"
                     >
                       <td className="px-6 py-4">
-                        <p className="text-sm font-semibold text-slate-800">
-                          {product.name}
-                        </p>
+                        <div className="flex items-center gap-3">
+                          {product.image ? (
+                            <img
+                              src={product.image}
+                              alt={product.name}
+                              className="h-12 w-12 rounded-lg border border-slate-200 object-cover"
+                            />
+                          ) : (
+                            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-slate-100 text-xs text-slate-400">
+                              No Image
+                            </div>
+                          )}
+
+                          <p className="text-sm font-semibold text-slate-800">
+                            {product.name}
+                          </p>
+                        </div>
                       </td>
 
                       <td className="px-6 py-4">
@@ -503,7 +575,9 @@ export default function AdminProductsPage() {
                         <div className="flex justify-end gap-2">
                           <button
                             type="button"
-                            onClick={() => handleEdit(product)}
+                            onClick={() =>
+                              handleEdit(product)
+                            }
                             className="rounded-lg border border-cyan-200 px-3 py-2 text-xs font-medium text-cyan-700 transition-colors hover:bg-cyan-50"
                           >
                             Edit

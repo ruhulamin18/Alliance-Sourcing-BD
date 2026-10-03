@@ -1,3 +1,5 @@
+"use client";
+
 import {
   ClipboardCheck,
   FileCheck2,
@@ -5,48 +7,74 @@ import {
   PackageCheck,
   ReceiptText,
   Ship,
+  LucideIcon,
 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 
-const services = [
-  {
-    icon: PackageCheck,
-    title: "Product development & sampling",
-    description:
-      "We create samples that perfectly match your vision, ensuring precision, quality, and attention to every detail.",
-  },
-  {
-    icon: Handshake,
-    title: "Supplier selection & evaluation",
-    description:
-      "We find reliable manufacturers meeting your standards, ensuring quality, consistency, and excellence.",
-  },
-  {
-    icon: ReceiptText,
-    title: "Price negotiation & order placement",
-    description:
-      "We secure the best terms for your orders, ensuring competitive pricing, favorable conditions, and smooth transactions.",
-  },
-  {
-    icon: ClipboardCheck,
-    title: "Production follow-up & quality inspection test",
-    description:
-      "We monitor every batch from loom to shipment, ensuring consistent quality, accuracy, and timely delivery.",
-  },
-  {
-    icon: FileCheck2,
-    title: "Compliance Assistance",
-    description:
-      "We work with factories aligned with international buyer standards and ethical practices.",
-  },
-  {
-    icon: Ship,
-    title: "Shipping Coordination",
-    description:
-      "Documentation support and shipment coordination with partners for smooth delivery.",
-  },
-];
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
+interface Service {
+  id: number;
+  title: string;
+  description: string;
+  image: string | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+const iconMap: Record<string, LucideIcon> = {
+  "Product development & sampling": PackageCheck,
+  "Supplier selection & evaluation": Handshake,
+  "Price negotiation & order placement": ReceiptText,
+  "Production follow-up & quality inspection test": ClipboardCheck,
+  "Compliance Assistance": FileCheck2,
+  "Shipping Coordination": Ship,
+};
+
+const defaultIcon = PackageCheck;
 
 export function BuyingHouseServices() {
+  const [services, setServices] = useState<Service[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        const response = await fetch(`${API_URL}/api/services`);
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(
+            result.message || "Failed to fetch services"
+          );
+        }
+
+        setServices(result.data || []);
+      } catch (error) {
+        setError(
+          error instanceof Error
+            ? error.message
+            : "Failed to load services"
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchServices();
+  }, []);
+
+  const activeServices = useMemo(() => {
+    return services.filter((service) => service.isActive);
+  }, [services]);
+
   return (
     <section className="bg-white py-14 sm:py-16 lg:py-20">
       <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-10">
@@ -65,79 +93,108 @@ export function BuyingHouseServices() {
           </p>
         </div>
 
-        {/* Service Cards */}
-        <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {services.map((service) => {
-            const Icon = service.icon;
+        {/* Loading State */}
+        {loading && (
+          <div className="mt-12 text-center">
+            <p className="text-sm text-slate-500">
+              Loading services...
+            </p>
+          </div>
+        )}
 
-            return (
-              <div
-                key={service.title}
-                className="
-                  group
-                  min-h-[175px]
-                  rounded-xl
-                  border border-slate-100
-                  bg-white
-                  px-5 py-5
-                  shadow-[0_4px_18px_rgba(15,23,42,0.07)]
-                  transition-all duration-300
-                  hover:-translate-y-1
-                  hover:bg-cyan-600
-                  hover:shadow-[0_10px_28px_rgba(8,145,178,0.25)]
-                "
-              >
-                {/* Icon */}
+        {/* Error State */}
+        {!loading && error && (
+          <div className="mt-12 text-center">
+            <p className="text-sm text-red-500">
+              {error}
+            </p>
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!loading && !error && activeServices.length === 0 && (
+          <div className="mt-12 text-center">
+            <p className="text-sm text-slate-500">
+              No services available at the moment.
+            </p>
+          </div>
+        )}
+
+        {/* Service Cards */}
+        {!loading && !error && activeServices.length > 0 && (
+          <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {activeServices.map((service) => {
+              const Icon = iconMap[service.title] || defaultIcon;
+
+              return (
                 <div
+                  key={service.id}
                   className="
-                    flex h-14 w-14
-                    items-center justify-center
+                    group
+                    min-h-[175px]
                     rounded-xl
-                    bg-sky-50
-                    transition-colors duration-300
-                    group-hover:bg-white/10
+                    border border-slate-100
+                    bg-white
+                    px-5 py-5
+                    shadow-[0_4px_18px_rgba(15,23,42,0.07)]
+                    transition-all duration-300
+                    hover:-translate-y-1
+                    hover:bg-cyan-600
+                    hover:shadow-[0_10px_28px_rgba(8,145,178,0.25)]
                   "
                 >
-                  <Icon
+                  {/* Icon */}
+                  <div
                     className="
-                      h-8 w-8
-                      text-sky-500
+                      flex h-14 w-14
+                      items-center justify-center
+                      rounded-xl
+                      bg-sky-50
+                      transition-colors duration-300
+                      group-hover:bg-white/10
+                    "
+                  >
+                    <Icon
+                      className="
+                        h-8 w-8
+                        text-sky-500
+                        transition-colors duration-300
+                        group-hover:text-white
+                      "
+                      strokeWidth={1.8}
+                    />
+                  </div>
+
+                  {/* Title */}
+                  <h3
+                    className="
+                      mt-5
+                      text-lg font-bold leading-6
+                      text-slate-900
                       transition-colors duration-300
                       group-hover:text-white
                     "
-                    strokeWidth={1.8}
-                  />
+                  >
+                    {service.title}
+                  </h3>
+
+                  {/* Description */}
+                  <p
+                    className="
+                      mt-2
+                      text-sm leading-6
+                      text-slate-500
+                      transition-colors duration-300
+                      group-hover:text-white/95
+                    "
+                  >
+                    {service.description}
+                  </p>
                 </div>
-
-                {/* Title */}
-                <h3
-                  className="
-                    mt-5
-                    text-lg font-bold leading-6
-                    text-slate-900
-                    transition-colors duration-300
-                    group-hover:text-white
-                  "
-                >
-                  {service.title}
-                </h3>
-
-                {/* Description */}
-                <p
-                  className="
-                    mt-2
-                    text-sm leading-6
-                    text-slate-500
-                    transition-colors duration-300
-                    group-hover:text-white/95
-                  "
-                >
-                  {service.description}
-                </p>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </section>
   );

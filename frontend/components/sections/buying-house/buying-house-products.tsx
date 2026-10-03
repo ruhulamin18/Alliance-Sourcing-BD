@@ -1,152 +1,84 @@
+"use client";
+
 import Image from "next/image";
+import { useEffect, useMemo, useState } from "react";
+
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 interface Product {
+  id: number;
   name: string;
-  image: string;
+  description: string | null;
+  image: string | null;
+  category: string | null;
+  isActive: boolean;
 }
 
 interface ProductCategory {
   title: string;
-  subtitle?: string;
   products: Product[];
 }
 
-const productCategories: ProductCategory[] = [
-  {
-    title: "Knitwear",
-    subtitle: "T-Shirt",
-    products: [
-      {
-        name: "Premium Soft Touch V-Neck",
-        image: "/products/tshirt-1.jpg",
-      },
-      {
-        name: "Pique Polo Shirt",
-        image: "/products/tshirt-2.jpg",
-      },
-      {
-        name: "Urban Style Graphic T-Shirt",
-        image: "/products/tshirt-3.jpg",
-      },
-    ],
-  },
-  {
-    title: "",
-    subtitle: "Polo",
-    products: [
-      {
-        name: "Classic Piqué Polo Shirt",
-        image: "/products/polo-1.jpg",
-      },
-      {
-        name: "Premium Soft Touch V-Neck",
-        image: "/products/polo-2.jpg",
-      },
-      {
-        name: "Sport Dry Polo Shirt",
-        image: "/products/polo-3.jpg",
-      },
-      {
-        name: "Urban Style Graphic T-Shirt",
-        image: "/products/polo-4.jpg",
-      },
-    ],
-  },
-  {
-    title: "",
-    subtitle: "Hoodie",
-    products: [
-      {
-        name: "Classic Pullover Hoodie",
-        image: "/products/hoodie-1.png",
-      },
-      {
-        name: "Zipper Front Fleece Hoodie",
-        image: "/products/hoodie-2.png",
-      },
-      {
-        name: "Premium Heavyweight Hoodie",
-        image: "/products/hoodie-3.png",
-      },
-      {
-        name: "Streetwear Oversized Hoodie",
-        image: "/products/hoodie-4.png",
-      },
-    ],
-  },
-  {
-    title: "Sweaters",
-    subtitle: "Men's Sweaters",
-    products: [
-      {
-        name: "Crew Neck Sweater",
-        image: "/products/sweater-1.png",
-      },
-      {
-        name: "V-Neck Sweater",
-        image: "/products/sweater-2.png",
-      },
-      {
-        name: "Cardigan Sweater",
-        image: "/products/sweater-3.png",
-      },
-      {
-        name: "Turtleneck Sweater",
-        image: "/products/sweater-4.png",
-      },
-    ],
-  },
-  {
-    title: "Woven",
-    subtitle: "Five Pocket Twill",
-    products: [
-      {
-        name: "Five Pocket Twill",
-        image: "/products/twill-1.png",
-      },
-      {
-        name: "Five Pocket Twill",
-        image: "/products/twill-2.png",
-      },
-      {
-        name: "Five Pocket Twill",
-        image: "/products/twill-3.png",
-      },
-      {
-        name: "Five Pocket Twill",
-        image: "/products/twill-4.png",
-      },
-      {
-        name: "Five Pocket Twill",
-        image: "/products/twill-5.png",
-      },
-    ],
-  },
-  {
-    title: "",
-    subtitle: "Ladies Dress & Jackets",
-    products: [
-      {
-        name: "Ladies Dresses",
-        image: "/products/ladies-dress-1.png",
-      },
-      {
-        name: "Ladies Dresses",
-        image: "/products/ladies-dress-2.png",
-      },
-      {
-        name: "Ladies Jacket",
-        image: "/products/ladies-jacket-1.png",
-      },
-      {
-        name: "Ladies Jacket",
-        image: "/products/ladies-jacket-2.png",
-      },
-    ],
-  },
-];
-
 export function BuyingHouseProducts() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        const response = await fetch(`${API_URL}/api/products`);
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(
+            result.message || "Failed to fetch products"
+          );
+        }
+
+        setProducts(result.data || []);
+      } catch (error) {
+        setError(
+          error instanceof Error
+            ? error.message
+            : "Failed to load products"
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  const productCategories = useMemo<ProductCategory[]>(() => {
+    const groupedProducts: Record<string, Product[]> = {};
+
+    products
+      .filter((product) => product.isActive)
+      .forEach((product) => {
+        const category = product.category?.trim() || "Other";
+
+        if (!groupedProducts[category]) {
+          groupedProducts[category] = [];
+        }
+
+        groupedProducts[category].push(product);
+      });
+
+    return Object.entries(groupedProducts).map(
+      ([category, products]) => ({
+        title: category,
+        products,
+      })
+    );
+  }, [products]);
+
   return (
     <section className="bg-white py-16 sm:py-20 lg:py-24">
       <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-10">
@@ -162,78 +94,99 @@ export function BuyingHouseProducts() {
           </p>
         </div>
 
+        {/* Loading State */}
+        {loading && (
+          <div className="mt-16 text-center">
+            <p className="text-sm text-slate-500">
+              Loading products...
+            </p>
+          </div>
+        )}
+
+        {/* Error State */}
+        {!loading && error && (
+          <div className="mt-16 text-center">
+            <p className="text-sm text-red-500">
+              {error}
+            </p>
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!loading && !error && productCategories.length === 0 && (
+          <div className="mt-16 text-center">
+            <p className="text-sm text-slate-500">
+              No products available at the moment.
+            </p>
+          </div>
+        )}
+
         {/* Product Categories */}
-        <div className="mt-16 space-y-12">
-          {productCategories.map((category, categoryIndex) => (
-            <div key={`${category.title}-${category.subtitle}`}>
-              {/* Main Category */}
-              {category.title && (
+        {!loading && !error && productCategories.length > 0 && (
+          <div className="mt-16 space-y-12">
+            {productCategories.map((category) => (
+              <div key={category.title}>
+                {/* Main Category */}
                 <h3 className="text-3xl font-bold tracking-tight text-slate-900">
                   {category.title}
                 </h3>
-              )}
 
-              {/* Subcategory */}
-              {category.subtitle && (
-                <div
-                  className={`flex items-center gap-4 ${
-                    category.title ? "mt-7" : ""
-                  }`}
-                >
-                  <h4 className="shrink-0 text-lg font-semibold text-slate-900 sm:text-xl">
-                    {category.subtitle}
-                  </h4>
+                {/* Product Grid */}
+                <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                  {category.products.map((product) => (
+                    <div
+                      key={product.id}
+                      className="
+                        group
+                        overflow-hidden
+                        rounded-xl
+                        border border-slate-200
+                        bg-white
+                        transition-all duration-300
+                        hover:-translate-y-1
+                        hover:shadow-lg
+                      "
+                    >
+                      {/* Product Image */}
+                      <div className="relative flex h-48 items-center justify-center overflow-hidden bg-white sm:h-52">
+                        {product.image ? (
+                          <Image
+                            src={product.image}
+                            alt={product.name}
+                            fill
+                            className="
+                              object-contain
+                              p-3
+                              transition-transform duration-500
+                              group-hover:scale-105
+                            "
+                            unoptimized
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center bg-slate-50">
+                            <span className="text-xs text-slate-400">
+                              No Image
+                            </span>
+                          </div>
+                        )}
+                      </div>
 
-                  <div className="h-px flex-1 bg-slate-200" />
+                      {/* Product Name */}
+                      <div className="px-4 pb-4 pt-2 text-center">
+                        <p className="truncate text-xs font-semibold text-slate-700 sm:text-sm">
+                          {product.name}
+                        </p>
+
+                        {/* Cyan Underline */}
+                        <div className="mx-auto mt-2 h-0.5 w-6 bg-cyan-400 transition-all duration-300 group-hover:w-10" />
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              )}
-
-              {/* Product Grid */}
-              <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-                {category.products.map((product, index) => (
-                  <div
-                    key={`${product.name}-${index}`}
-                    className="
-                      group
-                      overflow-hidden
-                      rounded-xl
-                      border border-slate-200
-                      bg-white
-                      transition-all duration-300
-                      hover:-translate-y-1
-                      hover:shadow-lg
-                    "
-                  >
-                    {/* Product Image */}
-                    <div className="relative flex h-48 items-center justify-center overflow-hidden bg-white sm:h-52">
-                      <Image
-                        src={product.image}
-                        alt={product.name}
-                        fill
-                        className="
-                          object-contain
-                          p-3
-                          transition-transform duration-500
-                          group-hover:scale-105
-                        "
-                      />
-                    </div>
-
-                    {/* Product Name */}
-                    <div className="px-4 pb-4 pt-2 text-center">
-                      <p className="truncate text-xs font-semibold text-slate-700 sm:text-sm">
-                        {product.name}
-                      </p>
-
-                      {/* Cyan Underline */}
-                      <div className="mx-auto mt-2 h-0.5 w-6 bg-cyan-400 transition-all duration-300 group-hover:w-10" />
-                    </div>
-                  </div>
-                ))}
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
