@@ -4,6 +4,11 @@ import "dotenv/config";
 import contactRoutes from "./routes/contact.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import messageRoutes from "./routes/message.routes.js";
+import serviceRoutes from "./routes/service.routes.js";
+import productRoutes from "./routes/product.routes.js";
+import factoryRoutes from "./routes/factory.routes.js";
+import machineryRoutes from "./routes/machinery.routes.js";
+import partnerRoutes from "./routes/partner.routes.js";
 
 const app = express();
 
@@ -26,6 +31,11 @@ app.get("/", (req, res) => {
 app.use("/api/contact", contactRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
+app.use("/api/services", serviceRoutes);
+app.use("/api/products", productRoutes);
+app.use("/api/factories", factoryRoutes);
+app.use("/api/machineries", machineryRoutes);
+app.use("/api/partners", partnerRoutes);
 
 const PORT = process.env.PORT || 5000;
 
