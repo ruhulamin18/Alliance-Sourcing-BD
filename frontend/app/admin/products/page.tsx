@@ -12,6 +12,7 @@ interface Product {
   description: string | null;
   image: string | null;
   category: string | null;
+  subcategory: string | null;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -22,6 +23,7 @@ interface ProductForm {
   description: string;
   image: string;
   category: string;
+  subcategory: string;
   isActive: boolean;
 }
 
@@ -30,25 +32,32 @@ const initialForm: ProductForm = {
   description: "",
   image: "",
   category: "",
+  subcategory: "",
   isActive: true,
 };
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [form, setForm] = useState<ProductForm>(initialForm);
+
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
+
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
+  // Fetch Products
   const fetchProducts = async () => {
     try {
+      setLoading(true);
       setError("");
 
       const response = await fetch(`${API_URL}/api/products`);
+
       const result = await response.json();
 
       if (!response.ok) {
@@ -57,7 +66,9 @@ export default function AdminProductsPage() {
         );
       }
 
-      setProducts(result.data);
+      // Backend response:
+      // { success: true, products: [...] }
+      setProducts(result.products || []);
     } catch (error) {
       setError(
         error instanceof Error
@@ -73,12 +84,14 @@ export default function AdminProductsPage() {
     fetchProducts();
   }, []);
 
+  // Reset Form
   const resetForm = () => {
     setForm(initialForm);
     setEditingId(null);
     setShowForm(false);
   };
 
+  // Image Upload
   const handleImageUpload = async (
     event: ChangeEvent<HTMLInputElement>
   ) => {
@@ -118,7 +131,7 @@ export default function AdminProductsPage() {
 
       setForm((currentForm) => ({
         ...currentForm,
-        image: result.data.url,
+        image: result.data?.url || result.url || "",
       }));
 
       setSuccess("Image uploaded successfully.");
@@ -134,6 +147,7 @@ export default function AdminProductsPage() {
     }
   };
 
+  // Create / Update Product
   const handleSubmit = async (
     event: FormEvent<HTMLFormElement>
   ) => {
@@ -185,6 +199,7 @@ export default function AdminProductsPage() {
       );
 
       resetForm();
+
       await fetchProducts();
     } catch (error) {
       setError(
@@ -197,6 +212,7 @@ export default function AdminProductsPage() {
     }
   };
 
+  // Edit Product
   const handleEdit = (product: Product) => {
     setEditingId(product.id);
 
@@ -205,6 +221,7 @@ export default function AdminProductsPage() {
       description: product.description || "",
       image: product.image || "",
       category: product.category || "",
+      subcategory: product.subcategory || "",
       isActive: product.isActive,
     });
 
@@ -213,6 +230,7 @@ export default function AdminProductsPage() {
     setSuccess("");
   };
 
+  // Delete Product
   const handleDelete = async (id: number) => {
     const confirmed = window.confirm(
       "Are you sure you want to delete this product?"
@@ -263,6 +281,8 @@ export default function AdminProductsPage() {
   return (
     <AdminLayout>
       <div className="space-y-6">
+
+        {/* Header */}
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div>
             <h2 className="text-2xl font-bold text-slate-800">
@@ -289,20 +309,24 @@ export default function AdminProductsPage() {
           </button>
         </div>
 
+        {/* Error */}
         {error && (
           <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
             {error}
           </div>
         )}
 
+        {/* Success */}
         {success && (
           <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
             {success}
           </div>
         )}
 
+        {/* Form */}
         {showForm && (
           <div className="rounded-xl border border-slate-200 bg-white p-6">
+
             <div className="mb-6 flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-bold text-slate-800">
@@ -326,6 +350,8 @@ export default function AdminProductsPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">
+
+              {/* Product Name */}
               <div>
                 <label
                   htmlFor="product-name"
@@ -350,6 +376,7 @@ export default function AdminProductsPage() {
                 />
               </div>
 
+              {/* Category */}
               <div>
                 <label
                   htmlFor="product-category"
@@ -369,10 +396,36 @@ export default function AdminProductsPage() {
                     })
                   }
                   placeholder="e.g. Knitwear"
+                  required
                   className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
                 />
               </div>
 
+              {/* Subcategory */}
+              <div>
+                <label
+                  htmlFor="product-subcategory"
+                  className="mb-2 block text-sm font-medium text-slate-700"
+                >
+                  Subcategory
+                </label>
+
+                <input
+                  id="product-subcategory"
+                  type="text"
+                  value={form.subcategory}
+                  onChange={(event) =>
+                    setForm({
+                      ...form,
+                      subcategory: event.target.value,
+                    })
+                  }
+                  placeholder="e.g. T-Shirt"
+                  className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
+                />
+              </div>
+
+              {/* Description */}
               <div>
                 <label
                   htmlFor="product-description"
@@ -396,6 +449,7 @@ export default function AdminProductsPage() {
                 />
               </div>
 
+              {/* Image */}
               <div>
                 <label
                   htmlFor="product-image"
@@ -434,6 +488,7 @@ export default function AdminProductsPage() {
                 )}
               </div>
 
+              {/* Active */}
               <label className="flex cursor-pointer items-center gap-3">
                 <input
                   type="checkbox"
@@ -452,6 +507,7 @@ export default function AdminProductsPage() {
                 </span>
               </label>
 
+              {/* Buttons */}
               <div className="flex gap-3">
                 <button
                   type="submit"
@@ -477,7 +533,9 @@ export default function AdminProductsPage() {
           </div>
         )}
 
+        {/* Product List */}
         <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+
           {loading ? (
             <div className="p-8 text-center text-sm text-slate-500">
               Loading products...
@@ -495,7 +553,8 @@ export default function AdminProductsPage() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[1050px]">
+              <table className="w-full min-w-[1150px]">
+
                 <thead className="border-b border-slate-200 bg-slate-50">
                   <tr>
                     <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
@@ -504,6 +563,10 @@ export default function AdminProductsPage() {
 
                     <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
                       Category
+                    </th>
+
+                    <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      Subcategory
                     </th>
 
                     <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
@@ -526,8 +589,10 @@ export default function AdminProductsPage() {
                       key={product.id}
                       className="hover:bg-slate-50"
                     >
+                      {/* Product */}
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
+
                           {product.image ? (
                             <img
                               src={product.image}
@@ -546,19 +611,29 @@ export default function AdminProductsPage() {
                         </div>
                       </td>
 
+                      {/* Category */}
                       <td className="px-6 py-4">
                         <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
                           {product.category || "Uncategorized"}
                         </span>
                       </td>
 
-                      <td className="max-w-[400px] px-6 py-4">
+                      {/* Subcategory */}
+                      <td className="px-6 py-4">
+                        <span className="rounded-full bg-cyan-50 px-3 py-1 text-xs font-medium text-cyan-700">
+                          {product.subcategory || "Not set"}
+                        </span>
+                      </td>
+
+                      {/* Description */}
+                      <td className="max-w-[350px] px-6 py-4">
                         <p className="truncate text-sm text-slate-600">
                           {product.description ||
                             "No description"}
                         </p>
                       </td>
 
+                      {/* Status */}
                       <td className="px-6 py-4">
                         {product.isActive ? (
                           <span className="inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
@@ -571,8 +646,10 @@ export default function AdminProductsPage() {
                         )}
                       </td>
 
+                      {/* Actions */}
                       <td className="px-6 py-4">
                         <div className="flex justify-end gap-2">
+
                           <button
                             type="button"
                             onClick={() =>
@@ -592,11 +669,13 @@ export default function AdminProductsPage() {
                           >
                             Delete
                           </button>
+
                         </div>
                       </td>
                     </tr>
                   ))}
                 </tbody>
+
               </table>
             </div>
           )}
