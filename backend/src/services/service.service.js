@@ -6,6 +6,7 @@ export const createService = async (data) => {
       title: data.title,
       description: data.description,
       image: data.image || null,
+      icon: data.icon || null,
       isActive: data.isActive ?? true,
     },
   });
@@ -36,6 +37,7 @@ export const updateService = async (id, data) => {
       title: data.title,
       description: data.description,
       image: data.image || null,
+      icon: data.icon || null,
       isActive: data.isActive,
     },
   });
